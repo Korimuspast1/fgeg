@@ -1,0 +1,8 @@
+# Local Python/tooling environments
+.venv/
+__pycache__/
+*.py[cod]
+
+# Reproducible intermediate audio and preview frames
+*.wav
+afterlight_preview.jpg

@@ -1,0 +1,12 @@
+[0:v]scale=1920:1920:force_original_aspect_ratio=increase,crop=1920:1080,gblur=sigma=52,eq=brightness=-0.30:saturation=0.72[bg];
+color=c=0x070A12@0.82:s=760x760:r=30[frame];
+[0:v]scale=720:720,eq=saturation=0.92[cover];
+[bg][frame]overlay=100:160[framed];
+[framed][cover]overlay=120:180[art];
+[art][1:v]overlay=970:150[base];
+[2:a]asplit=3[audio][waveaudio][specaudio];
+[audio]loudnorm=I=-14:TP=-1.2:LRA=9:measured_I=-11.28:measured_TP=3.17:measured_LRA=8.30:measured_thresh=-21.57:offset=-0.46:linear=false:print_format=summary[aout];
+[waveaudio]showwaves=s=780x130:mode=cline:rate=30:colors=0xECA960|0xA88ADB:scale=sqrt,format=rgba,colorkey=0x000000:0.14:0.08[wave];
+[specaudio]showspectrum=s=780x190:slide=scroll:mode=combined:color=magma:scale=cbrt:fscale=log:win_func=hann:overlap=0.75:gain=1.2:drange=88:fps=30:opacity=0.72,format=rgba,colorkey=0x000000:0.16:0.10,colorchannelmixer=aa=0.62[spec];
+[base][wave]overlay=1000:660[waveblend];
+[waveblend][spec]overlay=1000:820,format=yuv420p[vout]
