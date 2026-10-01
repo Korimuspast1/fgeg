@@ -1,30 +1,28 @@
-# ============================================================================
-#  install.ps1 — автоустановщик pz3d (Project Zomboid Build 42)
+п»їп»ї# ============================================================================
+#  install.ps1 вЂ” Р°РІС‚РѕСѓСЃС‚Р°РЅРѕРІС‰РёРє pz3d (Project Zomboid Build 42)
 #
-#  Что делает:
-#    1) Скачивает мод pz3d (из этого репозитория) и ZombieBuddy (Java-loader).
-#    2) Раскладывает моды в %USERPROFILE%\Zomboid\mods\.
-#    3) Копирует ZombieBuddy.jar + zbNative.dll в папку игры.
-#    4) Патчит ProjectZomboid64.json:  -agentlib:zbNative  и  -Xmx >= 4096m.
-#    5) Патчит ProjectZomboid64.bat:   SET _JAVA_OPTIONS=-agentlib:zbNative.
-#    6) Включает моды через Zomboid\mods\default.txt (старый — в .bak).
+#  Р§С‚Рѕ РґРµР»Р°РµС‚:
+#    1) РЎРєР°С‡РёРІР°РµС‚ РјРѕРґ pz3d (РёР· СЌС‚РѕРіРѕ СЂРµРїРѕР·РёС‚РѕСЂРёСЏ) Рё ZombieBuddy (Java-loader).
+#    2) Р Р°СЃРєР»Р°РґС‹РІР°РµС‚ РјРѕРґС‹ РІ %USERPROFILE%\Zomboid\mods\.
+#    3) РљРѕРїРёСЂСѓРµС‚ ZombieBuddy.jar + zbNative.dll РІ РїР°РїРєСѓ РёРіСЂС‹.
+#    4) РџР°С‚С‡РёС‚ ProjectZomboid64.json:  -agentlib:zbNative  Рё  -Xmx >= 4096m.
+#    5) РџР°С‚С‡РёС‚ ProjectZomboid64.bat:   SET _JAVA_OPTIONS=-agentlib:zbNative.
+#    6) Р’РєР»СЋС‡Р°РµС‚ РјРѕРґС‹ С‡РµСЂРµР· Zomboid\mods\default.txt (СЃС‚Р°СЂС‹Р№ вЂ” РІ .bak).
 #
-#  Запуск:  через start.bat  (или: powershell -File install.ps1)
-#  Удаление: powershell -File install.ps1 -Uninstall
+#  Р—Р°РїСѓСЃРє:  С‡РµСЂРµР· start.bat  (РёР»Рё: powershell -File install.ps1)
+#  РЈРґР°Р»РµРЅРёРµ: powershell -File install.ps1 -Uninstall
 # ============================================================================
 param(
     [string]$GameDir = "",
     [switch]$Uninstall
 )
-
 # Encoding self-test: if this file was mangled by copy-paste or a wrong
 # codepage, stop cleanly instead of crashing with weird parser errors.
 # (These comment lines are plain ASCII on purpose - do not touch them.)
-if ('я' -ne [char]0x044F) {
+if ('СЏ' -ne [char]0x044F) {
     Write-Host 'install.ps1: FILE ENCODING IS BROKEN.' -ForegroundColor Red
-    Write-Host 'Re-download install.ps1 from the repository as a ZIP or via' -ForegroundColor Red
-    Write-Host '"Download raw file" button. Do NOT copy-paste the ps1 text into' -ForegroundColor Red
-    Write-Host 'Notepad - it destroys the encoding. Aborting.' -ForegroundColor Red
+    Write-Host 'Re-download start.bat from the repository (it is self-contained' -ForegroundColor Red
+    Write-Host 'now and cannot be damaged this way). Aborting.' -ForegroundColor Red
     exit 3
 }
 
@@ -39,7 +37,7 @@ try {
         [Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls12
 } catch {}
 
-# ------------------------------ Настройки -----------------------------------
+# ------------------------------ РќР°СЃС‚СЂРѕР№РєРё -----------------------------------
 $script:Pz3dZipName = '3807334881_pz3d.zip'
 $script:Pz3dUrls = @(
     'https://github.com/Korimuspast1/fgeg/raw/main/3807334881_pz3d.zip',
@@ -60,19 +58,19 @@ $script:SavedPath  = Join-Path $script:ZomboidDir 'pz3d_installer_gamepath.txt'
 $script:Ts         = Get-Date -Format 'yyyyMMdd_HHmmss'
 $script:Step       = 0
 
-# ------------------------------ Сервисные функции ---------------------------
+# ------------------------------ РЎРµСЂРІРёСЃРЅС‹Рµ С„СѓРЅРєС†РёРё ---------------------------
 function Write-Step([string]$msg) {
     $script:Step++
     Write-Host ""
-    Write-Host "== [Шаг $($script:Step)] $msg" -ForegroundColor Cyan
+    Write-Host "== [РЁР°Рі $($script:Step)] $msg" -ForegroundColor Cyan
 }
 function Write-Ok([string]$msg)   { Write-Host "    OK: $msg" -ForegroundColor Green }
 function Write-Info([string]$msg) { Write-Host "    $msg" -ForegroundColor Gray }
-function Write-Warn([string]$msg) { Write-Host "    ВНИМАНИЕ: $msg" -ForegroundColor Yellow }
+function Write-Warn([string]$msg) { Write-Host "    Р’РќРРњРђРќРР•: $msg" -ForegroundColor Yellow }
 
 function Fail([string]$msg) {
     Write-Host ""
-    Write-Host "ОШИБКА: $msg" -ForegroundColor Red
+    Write-Host "РћРЁРР‘РљРђ: $msg" -ForegroundColor Red
     throw $msg
 }
 
@@ -84,14 +82,14 @@ function Backup-File([string]$path) {
     if (Test-Path $path) {
         $bak = "$path.bak.$($script:Ts)"
         Copy-Item $path $bak -Force
-        Write-Info "резервная копия: $bak"
+        Write-Info "СЂРµР·РµСЂРІРЅР°СЏ РєРѕРїРёСЏ: $bak"
     }
 }
 
 function Download-File {
     param([string[]]$Urls, [string]$Dest, [string]$What)
     foreach ($u in $Urls) {
-        Write-Info "скачиваю: $u"
+        Write-Info "СЃРєР°С‡РёРІР°СЋ: $u"
         try {
             Invoke-WebRequest -UseBasicParsing -Uri $u -OutFile $Dest -TimeoutSec 300
             if ((Test-Path $Dest) -and ((Get-Item $Dest).Length -gt 0)) { Write-Ok $What; return }
@@ -107,7 +105,7 @@ function Download-File {
             }
         }
     }
-    Fail "не удалось скачать ($What). Проверьте интернет или скачайте вручную: $($Urls[0])"
+    Fail "РЅРµ СѓРґР°Р»РѕСЃСЊ СЃРєР°С‡Р°С‚СЊ ($What). РџСЂРѕРІРµСЂСЊС‚Рµ РёРЅС‚РµСЂРЅРµС‚ РёР»Рё СЃРєР°С‡Р°Р№С‚Рµ РІСЂСѓС‡РЅСѓСЋ: $($Urls[0])"
 }
 
 function Test-DirWritable([string]$dir) {
@@ -123,11 +121,12 @@ function Test-ValidGameDir([string]$dir) {
     return ($dir -and (Test-Path (Join-Path $dir 'ProjectZomboid64.json')))
 }
 
-# ---------------------------- Поиск папки игры ------------------------------
+# ---------------------------- РџРѕРёСЃРє РїР°РїРєРё РёРіСЂС‹ ------------------------------
 function Resolve-GameDir {
     $candidates = @()
     if ($GameDir) { $candidates += $GameDir }
     if ($PSScriptRoot) { $candidates += $PSScriptRoot }
+    if ($env:PZ3D_INSTALLER_DIR) { $candidates += $env:PZ3D_INSTALLER_DIR }
     if (Test-Path $script:SavedPath) {
         $saved = ([IO.File]::ReadAllText($script:SavedPath)).Trim()
         if ($saved) { $candidates += $saved }
@@ -146,16 +145,16 @@ function Resolve-GameDir {
     }
 
     Write-Host ""
-    Write-Host "  Не нашёл игру автоматически. Введите путь к папке, в которой лежит" -ForegroundColor Yellow
-    Write-Host "  ProjectZomboid64.exe  (например:  C:\Games\Project Zomboid)" -ForegroundColor Yellow
-    Write-Host "  Подсказка: папку можно просто перетащить мышкой на файл start.bat," -ForegroundColor Yellow
-    Write-Host "  тогда этот вопрос не задаётся." -ForegroundColor Yellow
+    Write-Host "  РќРµ РЅР°С€С‘Р» РёРіСЂСѓ Р°РІС‚РѕРјР°С‚РёС‡РµСЃРєРё. Р’РІРµРґРёС‚Рµ РїСѓС‚СЊ Рє РїР°РїРєРµ, РІ РєРѕС‚РѕСЂРѕР№ Р»РµР¶РёС‚" -ForegroundColor Yellow
+    Write-Host "  ProjectZomboid64.exe  (РЅР°РїСЂРёРјРµСЂ:  C:\Games\Project Zomboid)" -ForegroundColor Yellow
+    Write-Host "  РџРѕРґСЃРєР°Р·РєР°: РїР°РїРєСѓ РјРѕР¶РЅРѕ РїСЂРѕСЃС‚Рѕ РїРµСЂРµС‚Р°С‰РёС‚СЊ РјС‹С€РєРѕР№ РЅР° С„Р°Р№Р» start.bat," -ForegroundColor Yellow
+    Write-Host "  С‚РѕРіРґР° СЌС‚РѕС‚ РІРѕРїСЂРѕСЃ РЅРµ Р·Р°РґР°С‘С‚СЃСЏ." -ForegroundColor Yellow
     for ($i = 0; $i -lt 3; $i++) {
-        $ans = (Read-Host "  Путь к папке игры").Trim().Trim('"')
+        $ans = (Read-Host "  РџСѓС‚СЊ Рє РїР°РїРєРµ РёРіСЂС‹").Trim().Trim('"')
         if (Test-ValidGameDir $ans) { return $ans }
-        Write-Warn "в этой папке нет ProjectZomboid64.exe / ProjectZomboid64.json — попробуйте ещё раз."
+        Write-Warn "РІ СЌС‚РѕР№ РїР°РїРєРµ РЅРµС‚ ProjectZomboid64.exe / ProjectZomboid64.json вЂ” РїРѕРїСЂРѕР±СѓР№С‚Рµ РµС‰С‘ СЂР°Р·."
     }
-    Fail "папка игры не указана."
+    Fail "РїР°РїРєР° РёРіСЂС‹ РЅРµ СѓРєР°Р·Р°РЅР°."
 }
 
 function Save-GameDir([string]$dir) {
@@ -170,26 +169,30 @@ function Request-ElevationIfNeeded([string]$dir) {
     $isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()
         ).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
     if ($isAdmin) {
-        Fail "нет доступа на запись в папку игры даже от администратора. Проверьте антивирус / права на папку: $dir"
+        Fail "РЅРµС‚ РґРѕСЃС‚СѓРїР° РЅР° Р·Р°РїРёСЃСЊ РІ РїР°РїРєСѓ РёРіСЂС‹ РґР°Р¶Рµ РѕС‚ Р°РґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂР°. РџСЂРѕРІРµСЂСЊС‚Рµ Р°РЅС‚РёРІРёСЂСѓСЃ / РїСЂР°РІР° РЅР° РїР°РїРєСѓ: $dir"
     }
-    Write-Warn "папка игры требует прав администратора — перезапускаю установщик от имени администратора..."
+    Write-Warn "РїР°РїРєР° РёРіСЂС‹ С‚СЂРµР±СѓРµС‚ РїСЂР°РІ Р°РґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂР° вЂ” РїРµСЂРµР·Р°РїСѓСЃРєР°СЋ СѓСЃС‚Р°РЅРѕРІС‰РёРє РѕС‚ РёРјРµРЅРё Р°РґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂР°..."
     $argList = @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', "`"$PSCommandPath`"", '-GameDir', "`"$dir`"")
     if ($Uninstall) { $argList += '-Uninstall' }
     Start-Process -FilePath 'powershell.exe' -ArgumentList $argList -Verb RunAs
-    Write-Info "установка продолжится в новом окне. Это окно можно закрыть."
+    Write-Info "СѓСЃС‚Р°РЅРѕРІРєР° РїСЂРѕРґРѕР»Р¶РёС‚СЃСЏ РІ РЅРѕРІРѕРј РѕРєРЅРµ. Р­С‚Рѕ РѕРєРЅРѕ РјРѕР¶РЅРѕ Р·Р°РєСЂС‹С‚СЊ."
     exit 99
 }
 
-# ------------------------------- Установка pz3d ------------------------------
+# ------------------------------- РЈСЃС‚Р°РЅРѕРІРєР° pz3d ------------------------------
 function Install-Pz3d([string]$work) {
-    Write-Step "Скачиваю мод pz3d"
+    Write-Step "РЎРєР°С‡РёРІР°СЋ РјРѕРґ pz3d"
     $zip   = Join-Path $work 'pz3d.zip'
     $local = Join-Path $PSScriptRoot $script:Pz3dZipName
+    if ((-not (Test-Path $local)) -and $env:PZ3D_INSTALLER_DIR) {
+        $alt = Join-Path $env:PZ3D_INSTALLER_DIR $script:Pz3dZipName
+        if (Test-Path $alt) { $local = $alt }
+    }
     if (Test-Path $local) {
-        Write-Info "использую локальный архив рядом со скриптом: $local"
+        Write-Info "РёСЃРїРѕР»СЊР·СѓСЋ Р»РѕРєР°Р»СЊРЅС‹Р№ Р°СЂС…РёРІ СЂСЏРґРѕРј СЃРѕ СЃРєСЂРёРїС‚РѕРј: $local"
         Copy-Item $local $zip -Force
     } else {
-        Download-File -Urls $script:Pz3dUrls -Dest $zip -What 'архив pz3d'
+        Download-File -Urls $script:Pz3dUrls -Dest $zip -What 'Р°СЂС…РёРІ pz3d'
     }
 
     $x = Join-Path $work 'pz3d_x'
@@ -197,31 +200,31 @@ function Install-Pz3d([string]$work) {
 
     $pz3dDir = Get-ChildItem -Path $x -Directory -Recurse -Filter 'pz3d' |
         Where-Object { $_.Parent.Name -ieq 'mods' } | Select-Object -First 1
-    if (-not $pz3dDir) { Fail "в архиве не найдена папка mods\pz3d" }
+    if (-not $pz3dDir) { Fail "РІ Р°СЂС…РёРІРµ РЅРµ РЅР°Р№РґРµРЅР° РїР°РїРєР° mods\pz3d" }
     $modsRoot = $pz3dDir.Parent.FullName
 
     Ensure-Dir $script:ModsDir
     foreach ($d in (Get-ChildItem $modsRoot -Directory)) {
         Copy-Item $d.FullName (Join-Path $script:ModsDir $d.Name) -Recurse -Force
-        Write-Ok "мод '$($d.Name)' -> $($script:ModsDir)"
+        Write-Ok "РјРѕРґ '$($d.Name)' -> $($script:ModsDir)"
     }
     $check = Get-ChildItem (Join-Path $script:ModsDir 'pz3d') -Recurse -Filter 'mod.info' -ErrorAction SilentlyContinue |
         Select-Object -First 1
-    if (-not $check) { Fail "мод pz3d скопировался неправильно (не найден mod.info)" }
+    if (-not $check) { Fail "РјРѕРґ pz3d СЃРєРѕРїРёСЂРѕРІР°Р»СЃСЏ РЅРµРїСЂР°РІРёР»СЊРЅРѕ (РЅРµ РЅР°Р№РґРµРЅ mod.info)" }
 }
 
-# ---------------------------- Установка ZombieBuddy --------------------------
+# ---------------------------- РЈСЃС‚Р°РЅРѕРІРєР° ZombieBuddy --------------------------
 function Install-ZombieBuddy([string]$work, [string]$gameDir) {
-    Write-Step "Скачиваю ZombieBuddy $script:ZbVersion (Java-loader, обязателен для pz3d)"
+    Write-Step "РЎРєР°С‡РёРІР°СЋ ZombieBuddy $script:ZbVersion (Java-loader, РѕР±СЏР·Р°С‚РµР»РµРЅ РґР»СЏ pz3d)"
 
     $zbZip = Join-Path $work 'zb_repo.zip'
-    Download-File -Urls $script:ZbRepoUrls -Dest $zbZip -What 'репозиторий ZombieBuddy'
+    Download-File -Urls $script:ZbRepoUrls -Dest $zbZip -What 'СЂРµРїРѕР·РёС‚РѕСЂРёР№ ZombieBuddy'
     $x = Join-Path $work 'zb_x'
     Expand-Archive -Path $zbZip -DestinationPath $x -Force
 
     $mi = Get-ChildItem -Path $x -Recurse -Filter 'mod.info' |
         Where-Object { $_.FullName -match '42[\\/]mod\.info$' } | Select-Object -First 1
-    if (-not $mi) { Fail "в репозитории ZombieBuddy не найден 42\mod.info" }
+    if (-not $mi) { Fail "РІ СЂРµРїРѕР·РёС‚РѕСЂРёРё ZombieBuddy РЅРµ РЅР°Р№РґРµРЅ 42\mod.info" }
     $zbRoot = Split-Path $mi.DirectoryName -Parent
 
     $dst = Join-Path $script:ModsDir 'ZombieBuddy'
@@ -229,7 +232,7 @@ function Install-ZombieBuddy([string]$work, [string]$gameDir) {
         $src = Join-Path $zbRoot $n
         if (Test-Path $src) { Copy-Item $src (Join-Path $dst $n) -Recurse -Force }
     }
-    Write-Ok "мод 'ZombieBuddy' -> $dst"
+    Write-Ok "РјРѕРґ 'ZombieBuddy' -> $dst"
 
     $libs = Join-Path $dst 'libs'
     Ensure-Dir $libs
@@ -237,14 +240,14 @@ function Install-ZombieBuddy([string]$work, [string]$gameDir) {
         Download-File -Urls @("$($script:ZbBaseUrl)/$f") -Dest (Join-Path $libs $f) -What "ZombieBuddy/$f"
     }
 
-    Write-Step "Копирую ZombieBuddy.jar и zbNative.dll в папку игры"
+    Write-Step "РљРѕРїРёСЂСѓСЋ ZombieBuddy.jar Рё zbNative.dll РІ РїР°РїРєСѓ РёРіСЂС‹"
     Copy-Item (Join-Path $libs 'ZombieBuddy.jar') (Join-Path $gameDir 'ZombieBuddy.jar') -Force
     Copy-Item (Join-Path $libs 'zbNative.dll')  (Join-Path $gameDir 'zbNative.dll')  -Force
     Write-Ok "$gameDir\ZombieBuddy.jar"
     Write-Ok "$gameDir\zbNative.dll"
 }
 
-# ----------------------------- Патч лаунчеров --------------------------------
+# ----------------------------- РџР°С‚С‡ Р»Р°СѓРЅС‡РµСЂРѕРІ --------------------------------
 function Update-XmxInList([System.Collections.ArrayList]$vm) {
     $found = $false
     for ($i = 0; $i -lt $vm.Count; $i++) {
@@ -273,11 +276,11 @@ function Update-XmxInText([string]$text) {
 }
 
 function Update-LauncherJson([string]$path) {
-    Write-Step "Патчу ProjectZomboid64.json (обычный запуск)"
-    if (-not (Test-Path $path)) { Fail "не найден $path" }
+    Write-Step "РџР°С‚С‡Сѓ ProjectZomboid64.json (РѕР±С‹С‡РЅС‹Р№ Р·Р°РїСѓСЃРє)"
+    if (-not (Test-Path $path)) { Fail "РЅРµ РЅР°Р№РґРµРЅ $path" }
     $raw = [IO.File]::ReadAllText($path)
     $cfg = $raw | ConvertFrom-Json
-    if ($null -eq $cfg.vmArgs) { Fail "в ProjectZomboid64.json нет секции vmArgs" }
+    if ($null -eq $cfg.vmArgs) { Fail "РІ ProjectZomboid64.json РЅРµС‚ СЃРµРєС†РёРё vmArgs" }
 
     $vm = New-Object System.Collections.ArrayList
     foreach ($a in $cfg.vmArgs) { [void]$vm.Add([string]$a) }
@@ -285,26 +288,26 @@ function Update-LauncherJson([string]$path) {
     $hasAgent = $false
     foreach ($a in $vm) { if ($a -like '-agentlib:zbNative*') { $hasAgent = $true } }
     if ($hasAgent) {
-        Write-Info "-agentlib:zbNative уже прописан"
+        Write-Info "-agentlib:zbNative СѓР¶Рµ РїСЂРѕРїРёСЃР°РЅ"
     } else {
         $vm.Insert(0, '-agentlib:zbNative')
-        Write-Ok "добавлен -agentlib:zbNative"
+        Write-Ok "РґРѕР±Р°РІР»РµРЅ -agentlib:zbNative"
     }
 
     Update-XmxInList $vm | Out-Null
-    Write-Ok "память для игры: минимум $($script:MinXmxMB) МБ"
+    Write-Ok "РїР°РјСЏС‚СЊ РґР»СЏ РёРіСЂС‹: РјРёРЅРёРјСѓРј $($script:MinXmxMB) РњР‘"
 
     $cfg.vmArgs = [object[]]($vm.ToArray())
     Backup-File $path
     $json = ConvertTo-Json $cfg -Depth 32
     [IO.File]::WriteAllText($path, $json + "`r`n", (New-Object System.Text.ASCIIEncoding))
-    Write-Ok "ProjectZomboid64.json обновлён"
+    Write-Ok "ProjectZomboid64.json РѕР±РЅРѕРІР»С‘РЅ"
 }
 
 function Update-LauncherBat([string]$path) {
-    Write-Step "Патчу ProjectZomboid64.bat (альтернативный запуск)"
+    Write-Step "РџР°С‚С‡Сѓ ProjectZomboid64.bat (Р°Р»СЊС‚РµСЂРЅР°С‚РёРІРЅС‹Р№ Р·Р°РїСѓСЃРє)"
     if (-not (Test-Path $path)) {
-        Write-Info "файл не найден — пропускаю (обычный запуск уже пропатчен)"
+        Write-Info "С„Р°Р№Р» РЅРµ РЅР°Р№РґРµРЅ вЂ” РїСЂРѕРїСѓСЃРєР°СЋ (РѕР±С‹С‡РЅС‹Р№ Р·Р°РїСѓСЃРє СѓР¶Рµ РїСЂРѕРїР°С‚С‡РµРЅ)"
         return
     }
     $txt = [IO.File]::ReadAllText($path)
@@ -313,7 +316,7 @@ function Update-LauncherBat([string]$path) {
     if ($txt.Contains("`r`n")) { $eol = "`r`n" }
 
     if ($txt -match '-agentlib:zbNative') {
-        Write-Info "-agentlib:zbNative уже прописан"
+        Write-Info "-agentlib:zbNative СѓР¶Рµ РїСЂРѕРїРёСЃР°РЅ"
     } elseif ($txt -match '(?im)^[ \t]*SET[ \t]+_JAVA_OPTIONS[ \t]*=.*$') {
         $txt = [regex]::Replace($txt, '(?im)^[ \t]*SET[ \t]+_JAVA_OPTIONS[ \t]*=.*$', 'SET _JAVA_OPTIONS=-agentlib:zbNative')
         Write-Ok "SET _JAVA_OPTIONS=-agentlib:zbNative"
@@ -324,7 +327,7 @@ function Update-LauncherBat([string]$path) {
         } else {
             $txt = 'SET _JAVA_OPTIONS=-agentlib:zbNative' + $eol + $txt
         }
-        Write-Ok "добавлена строка SET _JAVA_OPTIONS"
+        Write-Ok "РґРѕР±Р°РІР»РµРЅР° СЃС‚СЂРѕРєР° SET _JAVA_OPTIONS"
     }
 
     $txt = Update-XmxInText $txt
@@ -332,42 +335,42 @@ function Update-LauncherBat([string]$path) {
     if ($txt -ne $orig) {
         Backup-File $path
         [IO.File]::WriteAllText($path, $txt, (New-Object System.Text.ASCIIEncoding))
-        Write-Ok "ProjectZomboid64.bat обновлён"
+        Write-Ok "ProjectZomboid64.bat РѕР±РЅРѕРІР»С‘РЅ"
     }
 }
 
-# ----------------------------- Включение модов -------------------------------
+# ----------------------------- Р’РєР»СЋС‡РµРЅРёРµ РјРѕРґРѕРІ -------------------------------
 function Write-DefaultModList {
-    Write-Step "Включаю моды (Zomboid\mods\default.txt)"
+    Write-Step "Р’РєР»СЋС‡Р°СЋ РјРѕРґС‹ (Zomboid\mods\default.txt)"
     Ensure-Dir $script:ModsDir
     $def = Join-Path $script:ModsDir 'default.txt'
     Backup-File $def
-    # Формат игрового сериализатора: id модов в кавычках и с запятой,
-    # например:  "pz3d",   — без кавычек файл читается как пустой!
+    # Р¤РѕСЂРјР°С‚ РёРіСЂРѕРІРѕРіРѕ СЃРµСЂРёР°Р»РёР·Р°С‚РѕСЂР°: id РјРѕРґРѕРІ РІ РєР°РІС‹С‡РєР°С… Рё СЃ Р·Р°РїСЏС‚РѕР№,
+    # РЅР°РїСЂРёРјРµСЂ:  "pz3d",   вЂ” Р±РµР· РєР°РІС‹С‡РµРє С„Р°Р№Р» С‡РёС‚Р°РµС‚СЃСЏ РєР°Рє РїСѓСЃС‚РѕР№!
     $lines = @('VERSION = 1,', '', 'mods', '{')
     foreach ($id in $script:ModIds) { $lines += "`t`"$id`"," }
     $lines += @('}', '', 'maps', '{', '}')
     [IO.File]::WriteAllText($def, ($lines -join "`r`n") + "`r`n", (New-Object System.Text.ASCIIEncoding))
 
-    # Самопроверка: перечитываем файл и убеждаемся, что все id на месте
+    # РЎР°РјРѕРїСЂРѕРІРµСЂРєР°: РїРµСЂРµС‡РёС‚С‹РІР°РµРј С„Р°Р№Р» Рё СѓР±РµР¶РґР°РµРјСЃСЏ, С‡С‚Рѕ РІСЃРµ id РЅР° РјРµСЃС‚Рµ
     $check = [IO.File]::ReadAllText($def)
     foreach ($id in $script:ModIds) {
         if ($check -notmatch ('"' + [regex]::Escape($id) + '"')) {
-            Fail "default.txt записался некорректно (нет записи `"$id`") — включите моды вручную в меню игры 'Моды'."
+            Fail "default.txt Р·Р°РїРёСЃР°Р»СЃСЏ РЅРµРєРѕСЂСЂРµРєС‚РЅРѕ (РЅРµС‚ Р·Р°РїРёСЃРё `"$id`") вЂ” РІРєР»СЋС‡РёС‚Рµ РјРѕРґС‹ РІСЂСѓС‡РЅСѓСЋ РІ РјРµРЅСЋ РёРіСЂС‹ 'РњРѕРґС‹'."
         }
     }
-    Write-Ok "включены: $($script:ModIds -join ', ')"
-    Write-Info "все остальные моды выключены — так требует pz3d. Бэкап старого списка лежит рядом (*.bak)."
-    Write-Info "проверка: в главном меню игры зайдите в 'Моды' — все три должны быть с галочкой."
+    Write-Ok "РІРєР»СЋС‡РµРЅС‹: $($script:ModIds -join ', ')"
+    Write-Info "РІСЃРµ РѕСЃС‚Р°Р»СЊРЅС‹Рµ РјРѕРґС‹ РІС‹РєР»СЋС‡РµРЅС‹ вЂ” С‚Р°Рє С‚СЂРµР±СѓРµС‚ pz3d. Р‘СЌРєР°Рї СЃС‚Р°СЂРѕРіРѕ СЃРїРёСЃРєР° Р»РµР¶РёС‚ СЂСЏРґРѕРј (*.bak)."
+    Write-Info "РїСЂРѕРІРµСЂРєР°: РІ РіР»Р°РІРЅРѕРј РјРµРЅСЋ РёРіСЂС‹ Р·Р°Р№РґРёС‚Рµ РІ 'РњРѕРґС‹' вЂ” РІСЃРµ С‚СЂРё РґРѕР»Р¶РЅС‹ Р±С‹С‚СЊ СЃ РіР°Р»РѕС‡РєРѕР№."
 }
 
-# -------------------------------- Удаление -----------------------------------
+# -------------------------------- РЈРґР°Р»РµРЅРёРµ -----------------------------------
 function Invoke-Uninstall([string]$gameDir) {
-    Write-Step "Удаляю ZombieBuddy и pz3d"
+    Write-Step "РЈРґР°Р»СЏСЋ ZombieBuddy Рё pz3d"
 
     foreach ($f in @('ZombieBuddy.jar', 'ZombieBuddy.jar.new', 'zbNative.dll')) {
         $p = Join-Path $gameDir $f
-        if (Test-Path $p) { Remove-Item $p -Force; Write-Ok "удалено: $p" }
+        if (Test-Path $p) { Remove-Item $p -Force; Write-Ok "СѓРґР°Р»РµРЅРѕ: $p" }
     }
 
     $jsonPath = Join-Path $gameDir 'ProjectZomboid64.json'
@@ -379,7 +382,7 @@ function Invoke-Uninstall([string]$gameDir) {
             $cfg.vmArgs = $keep
             Backup-File $jsonPath
             [IO.File]::WriteAllText($jsonPath, (ConvertTo-Json $cfg -Depth 32) + "`r`n", (New-Object System.Text.ASCIIEncoding))
-            Write-Ok "ProjectZomboid64.json очищен"
+            Write-Ok "ProjectZomboid64.json РѕС‡РёС‰РµРЅ"
         }
     }
 
@@ -390,39 +393,39 @@ function Invoke-Uninstall([string]$gameDir) {
             $txt = [regex]::Replace($txt, '(?im)^[ \t]*SET[ \t]+_JAVA_OPTIONS[ \t]*=.*$', 'SET _JAVA_OPTIONS=')
             Backup-File $batPath
             [IO.File]::WriteAllText($batPath, $txt, (New-Object System.Text.ASCIIEncoding))
-            Write-Ok "ProjectZomboid64.bat очищен"
+            Write-Ok "ProjectZomboid64.bat РѕС‡РёС‰РµРЅ"
         }
     }
 
     foreach ($id in $script:ModIds) {
         $p = Join-Path $script:ModsDir $id
-        if (Test-Path $p) { Remove-Item $p -Recurse -Force; Write-Ok "удалён мод: $p" }
+        if (Test-Path $p) { Remove-Item $p -Recurse -Force; Write-Ok "СѓРґР°Р»С‘РЅ РјРѕРґ: $p" }
     }
 
     $def = Join-Path $script:ModsDir 'default.txt'
     $baks = Get-ChildItem "$def.bak.*" -ErrorAction SilentlyContinue | Sort-Object Name -Descending
     if ($baks.Count -gt 0) {
         Copy-Item $baks[0].FullName $def -Force
-        Write-Ok "восстановлен список модов из $($baks[0].Name)"
+        Write-Ok "РІРѕСЃСЃС‚Р°РЅРѕРІР»РµРЅ СЃРїРёСЃРѕРє РјРѕРґРѕРІ РёР· $($baks[0].Name)"
     } elseif (Test-Path $def) {
         Remove-Item $def -Force
-        Write-Ok "default.txt удалён"
+        Write-Ok "default.txt СѓРґР°Р»С‘РЅ"
     }
 
     Write-Host ""
-    Write-Host "  Готово: pz3d и ZombieBuddy удалены, лаунчеры возвращены в исходное." -ForegroundColor Green
+    Write-Host "  Р“РѕС‚РѕРІРѕ: pz3d Рё ZombieBuddy СѓРґР°Р»РµРЅС‹, Р»Р°СѓРЅС‡РµСЂС‹ РІРѕР·РІСЂР°С‰РµРЅС‹ РІ РёСЃС…РѕРґРЅРѕРµ." -ForegroundColor Green
 }
 
 # --------------------------------- MAIN --------------------------------------
 try {
     Write-Host ""
     Write-Host "  =============================================================" -ForegroundColor DarkCyan
-    Write-Host "   pz3d  автоустановщик  (Project Zomboid Build 42.21.0)" -ForegroundColor DarkCyan
+    Write-Host "   pz3d  Р°РІС‚РѕСѓСЃС‚Р°РЅРѕРІС‰РёРє  (Project Zomboid Build 42.21.0)" -ForegroundColor DarkCyan
     Write-Host "  =============================================================" -ForegroundColor DarkCyan
-    Write-Warn "игра должна быть версии 42.21.0 — иначе pz3d не запустится."
+    Write-Warn "РёРіСЂР° РґРѕР»Р¶РЅР° Р±С‹С‚СЊ РІРµСЂСЃРёРё 42.21.0 вЂ” РёРЅР°С‡Рµ pz3d РЅРµ Р·Р°РїСѓСЃС‚РёС‚СЃСЏ."
 
     $game = Resolve-GameDir
-    Write-Ok "папка игры: $game"
+    Write-Ok "РїР°РїРєР° РёРіСЂС‹: $game"
     Save-GameDir $game
     Request-ElevationIfNeeded $game
 
@@ -443,32 +446,32 @@ try {
 
         Write-Host ""
         Write-Host "  =============================================================" -ForegroundColor Green
-        Write-Host "   ГОТОВО! pz3d + ZombieBuddy установлены и включены." -ForegroundColor Green
+        Write-Host "   Р“РћРўРћР’Рћ! pz3d + ZombieBuddy СѓСЃС‚Р°РЅРѕРІР»РµРЅС‹ Рё РІРєР»СЋС‡РµРЅС‹." -ForegroundColor Green
         Write-Host "  =============================================================" -ForegroundColor Green
         Write-Host ""
-        Write-Host "  Что дальше:" -ForegroundColor White
-        Write-Host "   1. Запустите игру." -ForegroundColor White
-        Write-Host "   2. Зайдите в меню 'Моды': ZombieBuddy, pz3d и pz3d_chainlink должны" -ForegroundColor White
-        Write-Host "      быть ВКЛЮЧЕНЫ. Если галочки не стоят - поставьте сами (сначала" -ForegroundColor White
-        Write-Host "      ZombieBuddy, потом pz3d) и нажмите 'Принять'." -ForegroundColor White
-        Write-Host "   3. При первом запуске с модами ZombieBuddy покажет окно" -ForegroundColor White
-        Write-Host "      подтверждения Java-мода pz3d - нажмите Yes. Окно может" -ForegroundColor White
-        Write-Host "      оказаться ПОД окном игры - проверьте через Alt+Tab!" -ForegroundColor White
-        Write-Host "   4. Слева вверху должно быть '1 active Java mods: pz3d'," -ForegroundColor White
-        Write-Host "      а в строке версии - приписка [ZB]." -ForegroundColor White
-        Write-Host "   5. Создайте НОВОЕ одиночное сохранение: моды включаются" -ForegroundColor White
-        Write-Host "      только для нового мира, в старом pz3d не появится." -ForegroundColor White
-        Write-Host "   6. После появления в мире нажмите Insert - вход в 3D-режим." -ForegroundColor White
+        Write-Host "  Р§С‚Рѕ РґР°Р»СЊС€Рµ:" -ForegroundColor White
+        Write-Host "   1. Р—Р°РїСѓСЃС‚РёС‚Рµ РёРіСЂСѓ." -ForegroundColor White
+        Write-Host "   2. Р—Р°Р№РґРёС‚Рµ РІ РјРµРЅСЋ 'РњРѕРґС‹': ZombieBuddy, pz3d Рё pz3d_chainlink РґРѕР»Р¶РЅС‹" -ForegroundColor White
+        Write-Host "      Р±С‹С‚СЊ Р’РљР›Р®Р§Р•РќР«. Р•СЃР»Рё РіР°Р»РѕС‡РєРё РЅРµ СЃС‚РѕСЏС‚ - РїРѕСЃС‚Р°РІСЊС‚Рµ СЃР°РјРё (СЃРЅР°С‡Р°Р»Р°" -ForegroundColor White
+        Write-Host "      ZombieBuddy, РїРѕС‚РѕРј pz3d) Рё РЅР°Р¶РјРёС‚Рµ 'РџСЂРёРЅСЏС‚СЊ'." -ForegroundColor White
+        Write-Host "   3. РџСЂРё РїРµСЂРІРѕРј Р·Р°РїСѓСЃРєРµ СЃ РјРѕРґР°РјРё ZombieBuddy РїРѕРєР°Р¶РµС‚ РѕРєРЅРѕ" -ForegroundColor White
+        Write-Host "      РїРѕРґС‚РІРµСЂР¶РґРµРЅРёСЏ Java-РјРѕРґР° pz3d - РЅР°Р¶РјРёС‚Рµ Yes. РћРєРЅРѕ РјРѕР¶РµС‚" -ForegroundColor White
+        Write-Host "      РѕРєР°Р·Р°С‚СЊСЃСЏ РџРћР” РѕРєРЅРѕРј РёРіСЂС‹ - РїСЂРѕРІРµСЂСЊС‚Рµ С‡РµСЂРµР· Alt+Tab!" -ForegroundColor White
+        Write-Host "   4. РЎР»РµРІР° РІРІРµСЂС…Сѓ РґРѕР»Р¶РЅРѕ Р±С‹С‚СЊ '1 active Java mods: pz3d'," -ForegroundColor White
+        Write-Host "      Р° РІ СЃС‚СЂРѕРєРµ РІРµСЂСЃРёРё - РїСЂРёРїРёСЃРєР° [ZB]." -ForegroundColor White
+        Write-Host "   5. РЎРѕР·РґР°Р№С‚Рµ РќРћР’РћР• РѕРґРёРЅРѕС‡РЅРѕРµ СЃРѕС…СЂР°РЅРµРЅРёРµ: РјРѕРґС‹ РІРєР»СЋС‡Р°СЋС‚СЃСЏ" -ForegroundColor White
+        Write-Host "      С‚РѕР»СЊРєРѕ РґР»СЏ РЅРѕРІРѕРіРѕ РјРёСЂР°, РІ СЃС‚Р°СЂРѕРј pz3d РЅРµ РїРѕСЏРІРёС‚СЃСЏ." -ForegroundColor White
+        Write-Host "   6. РџРѕСЃР»Рµ РїРѕСЏРІР»РµРЅРёСЏ РІ РјРёСЂРµ РЅР°Р¶РјРёС‚Рµ Insert - РІС…РѕРґ РІ 3D-СЂРµР¶РёРј." -ForegroundColor White
         Write-Host ""
 
-        $ans = Read-Host "  Запустить Project Zomboid сейчас? [Y/n]"
-        if ($ans -eq '' -or $ans -imatch '^(y|д|yes|да)') {
+        $ans = Read-Host "  Р—Р°РїСѓСЃС‚РёС‚СЊ Project Zomboid СЃРµР№С‡Р°СЃ? [Y/n]"
+        if ($ans -eq '' -or $ans -imatch '^(y|Рґ|yes|РґР°)') {
             $exe = Join-Path $game 'ProjectZomboid64.exe'
             if (Test-Path $exe) {
                 Start-Process $exe -WorkingDirectory $game
-                Write-Ok "игра запущена"
+                Write-Ok "РёРіСЂР° Р·Р°РїСѓС‰РµРЅР°"
             } else {
-                Write-Warn "ProjectZomboid64.exe не найден — запустите игру привычным способом."
+                Write-Warn "ProjectZomboid64.exe РЅРµ РЅР°Р№РґРµРЅ вЂ” Р·Р°РїСѓСЃС‚РёС‚Рµ РёРіСЂСѓ РїСЂРёРІС‹С‡РЅС‹Рј СЃРїРѕСЃРѕР±РѕРј."
             }
         }
     }
@@ -477,9 +480,9 @@ try {
     exit 0
 } catch {
     Write-Host ""
-    Write-Host "  Установка не завершена: $($_.Exception.Message)" -ForegroundColor Red
-    Write-Host "  Исправьте причину и запустите start.bat ещё раз - уже сделанное" -ForegroundColor Red
-    Write-Host "  не сломается, установка продолжится с места ошибки." -ForegroundColor Red
+    Write-Host "  РЈСЃС‚Р°РЅРѕРІРєР° РЅРµ Р·Р°РІРµСЂС€РµРЅР°: $($_.Exception.Message)" -ForegroundColor Red
+    Write-Host "  РСЃРїСЂР°РІСЊС‚Рµ РїСЂРёС‡РёРЅСѓ Рё Р·Р°РїСѓСЃС‚РёС‚Рµ start.bat РµС‰С‘ СЂР°Р· - СѓР¶Рµ СЃРґРµР»Р°РЅРЅРѕРµ" -ForegroundColor Red
+    Write-Host "  РЅРµ СЃР»РѕРјР°РµС‚СЃСЏ, СѓСЃС‚Р°РЅРѕРІРєР° РїСЂРѕРґРѕР»Р¶РёС‚СЃСЏ СЃ РјРµСЃС‚Р° РѕС€РёР±РєРё." -ForegroundColor Red
     Write-Host ""
     exit 1
 }
