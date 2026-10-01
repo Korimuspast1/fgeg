@@ -1,4 +1,4 @@
-﻿# ============================================================================
+# ============================================================================
 #  install.ps1 — автоустановщик pz3d (Project Zomboid Build 42)
 #
 #  Что делает:
@@ -331,12 +331,23 @@ function Write-DefaultModList {
     Ensure-Dir $script:ModsDir
     $def = Join-Path $script:ModsDir 'default.txt'
     Backup-File $def
+    # Формат игрового сериализатора: id модов в кавычках и с запятой,
+    # например:  "pz3d",   — без кавычек файл читается как пустой!
     $lines = @('VERSION = 1,', '', 'mods', '{')
-    foreach ($id in $script:ModIds) { $lines += "`t$id" }
+    foreach ($id in $script:ModIds) { $lines += "`t`"$id`"," }
     $lines += @('}', '', 'maps', '{', '}')
     [IO.File]::WriteAllText($def, ($lines -join "`r`n") + "`r`n", (New-Object System.Text.ASCIIEncoding))
+
+    # Самопроверка: перечитываем файл и убеждаемся, что все id на месте
+    $check = [IO.File]::ReadAllText($def)
+    foreach ($id in $script:ModIds) {
+        if ($check -notmatch ('"' + [regex]::Escape($id) + '"')) {
+            Fail "default.txt записался некорректно (нет записи `"$id`") — включите моды вручную в меню игры 'Моды'."
+        }
+    }
     Write-Ok "включены: $($script:ModIds -join ', ')"
     Write-Info "все остальные моды выключены — так требует pz3d. Бэкап старого списка лежит рядом (*.bak)."
+    Write-Info "проверка: в главном меню игры зайдите в 'Моды' — все три должны быть с галочкой."
 }
 
 # -------------------------------- Удаление -----------------------------------
@@ -426,11 +437,17 @@ try {
         Write-Host ""
         Write-Host "  Что дальше:" -ForegroundColor White
         Write-Host "   1. Запустите игру." -ForegroundColor White
-        Write-Host "   2. При первом запуске ZombieBuddy покажет окно подтверждения" -ForegroundColor White
-        Write-Host "      Java-мода pz3d - нажмите Yes (можно запомнить выбор)." -ForegroundColor White
-        Write-Host "   3. В главном меню в строке версии должна быть приписка [ZB]." -ForegroundColor White
-        Write-Host "   4. Создайте НОВОЕ одиночное сохранение (мультиплеер не поддержан)." -ForegroundColor White
-        Write-Host "   5. После появления в мире нажмите Insert - вход в 3D-режим." -ForegroundColor White
+        Write-Host "   2. Зайдите в меню 'Моды': ZombieBuddy, pz3d и pz3d_chainlink должны" -ForegroundColor White
+        Write-Host "      быть ВКЛЮЧЕНЫ. Если галочки не стоят - поставьте сами (сначала" -ForegroundColor White
+        Write-Host "      ZombieBuddy, потом pz3d) и нажмите 'Принять'." -ForegroundColor White
+        Write-Host "   3. При первом запуске с модами ZombieBuddy покажет окно" -ForegroundColor White
+        Write-Host "      подтверждения Java-мода pz3d - нажмите Yes. Окно может" -ForegroundColor White
+        Write-Host "      оказаться ПОД окном игры - проверьте через Alt+Tab!" -ForegroundColor White
+        Write-Host "   4. Слева вверху должно быть '1 active Java mods: pz3d'," -ForegroundColor White
+        Write-Host "      а в строке версии - приписка [ZB]." -ForegroundColor White
+        Write-Host "   5. Создайте НОВОЕ одиночное сохранение: моды включаются" -ForegroundColor White
+        Write-Host "      только для нового мира, в старом pz3d не появится." -ForegroundColor White
+        Write-Host "   6. После появления в мире нажмите Insert - вход в 3D-режим." -ForegroundColor White
         Write-Host ""
 
         $ans = Read-Host "  Запустить Project Zomboid сейчас? [Y/n]"
