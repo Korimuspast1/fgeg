@@ -1,0 +1,153 @@
+{
+  "source": "mytrack.mp3",
+  "tempo_bpm": 120.19,
+  "sample_rate": 44100,
+  "bit_depth": 24,
+  "loop": "Loops/DrumLoop_1bar_120bpm.wav",
+  "samples": [
+    {
+      "file": "Kick/Kick_01.wav",
+      "midi_note": 36,
+      "source_t_sec": 52.883,
+      "len_ms": 600.0,
+      "centroid_hz": 1884.6,
+      "score": 0.915
+    },
+    {
+      "file": "Kick/Kick_02.wav",
+      "midi_note": 36,
+      "source_t_sec": 3.39,
+      "len_ms": 600.0,
+      "centroid_hz": 1694.3,
+      "score": 0.912
+    },
+    {
+      "file": "Kick/Kick_03.wav",
+      "midi_note": 36,
+      "source_t_sec": 15.186,
+      "len_ms": 600.0,
+      "centroid_hz": 1666.4,
+      "score": 0.912
+    },
+    {
+      "file": "Kick/Kick_04.wav",
+      "midi_note": 36,
+      "source_t_sec": 4.365,
+      "len_ms": 567.6,
+      "centroid_hz": 1644.9,
+      "score": 0.911
+    },
+    {
+      "file": "Kick/Kick_05.wav",
+      "midi_note": 36,
+      "source_t_sec": 54.532,
+      "len_ms": 600.0,
+      "centroid_hz": 1691.4,
+      "score": 0.911
+    },
+    {
+      "file": "Kick/Kick_06.wav",
+      "midi_note": 36,
+      "source_t_sec": 9.288,
+      "len_ms": 600.0,
+      "centroid_hz": 1878.3,
+      "score": 0.911
+    },
+    {
+      "file": "Snare/Snare_01.wav",
+      "midi_note": 38,
+      "source_t_sec": 31.974,
+      "len_ms": 500.0,
+      "centroid_hz": 2705.0,
+      "score": 0.927
+    },
+    {
+      "file": "Snare/Snare_02.wav",
+      "midi_note": 38,
+      "source_t_sec": 41.68,
+      "len_ms": 500.0,
+      "centroid_hz": 2941.6,
+      "score": 0.925
+    },
+    {
+      "file": "Snare/Snare_03.wav",
+      "midi_note": 38,
+      "source_t_sec": 52.071,
+      "len_ms": 300.6,
+      "centroid_hz": 1953.1,
+      "score": 0.866
+    },
+    {
+      "file": "Snare/Snare_04.wav",
+      "midi_note": 38,
+      "source_t_sec": 29.037,
+      "len_ms": 416.7,
+      "centroid_hz": 1564.0,
+      "score": 0.826
+    },
+    {
+      "file": "Snare/Snare_05.wav",
+      "midi_note": 38,
+      "source_t_sec": 1.173,
+      "len_ms": 500.0,
+      "centroid_hz": 2756.1,
+      "score": 0.817
+    },
+    {
+      "file": "Snare/Snare_06.wav",
+      "midi_note": 38,
+      "source_t_sec": 8.8,
+      "len_ms": 323.8,
+      "centroid_hz": 2772.1,
+      "score": 0.81
+    },
+    {
+      "file": "HatClosed/HatClosed_01.wav",
+      "midi_note": 42,
+      "source_t_sec": 6.954,
+      "len_ms": 160.0,
+      "centroid_hz": 2445.9,
+      "score": 0.892
+    },
+    {
+      "file": "HatClosed/HatClosed_02.wav",
+      "midi_note": 42,
+      "source_t_sec": 59.942,
+      "len_ms": 160.0,
+      "centroid_hz": 2685.8,
+      "score": 0.888
+    },
+    {
+      "file": "HatClosed/HatClosed_03.wav",
+      "midi_note": 42,
+      "source_t_sec": 37.105,
+      "len_ms": 160.0,
+      "centroid_hz": 3475.9,
+      "score": 0.865
+    },
+    {
+      "file": "HatClosed/HatClosed_04.wav",
+      "midi_note": 42,
+      "source_t_sec": 36.838,
+      "len_ms": 160.0,
+      "centroid_hz": 3330.6,
+      "score": 0.786
+    },
+    {
+      "file": "HatOpen/HatOpen_01.wav",
+      "midi_note": 46,
+      "source_t_sec": 20.933,
+      "len_ms": 450.0,
+      "centroid_hz": 2737.6,
+      "score": 0.833
+    },
+    {
+      "file": "HatOpen/HatOpen_02.wav",
+      "midi_note": 46,
+      "source_t_sec": 40.763,
+      "len_ms": 450.0,
+      "centroid_hz": 3157.2,
+      "score": 0.755
+    }
+  ]
+}

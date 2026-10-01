@@ -1,0 +1,4 @@
+.venv_audio/
+oneshots/
+oneshots.zip
+__pycache__/
