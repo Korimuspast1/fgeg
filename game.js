@@ -1,5 +1,10 @@
 const canvas=document.getElementById('game'),ctx=canvas.getContext('2d');
-const W=1100,H=680; let keys={},selected=null,lastActivity=Date.now(),muted=false;
+const W=1100,H=680; let keys={},selected=null,lastActivity=Date.now(),muted=false,roomReady=false;
+const menu=document.getElementById('menu'),gameScreen=document.getElementById('gameScreen');
+document.getElementById('startBtn').onclick=()=>{menu.classList.add('hidden');gameScreen.classList.remove('hidden');toast('Пустой лофт готов — засели его сам');};
+document.getElementById('menuBtn').onclick=()=>{gameScreen.classList.add('hidden');menu.classList.remove('hidden');};
+document.getElementById('clearBtn').onclick=()=>{roomReady=false;toast('Комната очищена: предметы убраны');log('комната очищена','SYSTEM');};
+document.getElementById('howBtn').onclick=()=>toast('WASD — движение · CLICK — выбрать · SPACE — поговорить');
 const people=[
  {id:'template',name:'TEMPLATE',role:'base character',initial:'T',ava:'ava-a',x:345,y:330,color:'#f08b65',shirt:'#e9e1d5',hair:'#442d28',mood:'bored',line:'Ого, тут тихо…'},
  {id:'max',name:'МАКС',role:'resident / 24',initial:'М',ava:'ava-b',x:600,y:350,color:'#5c8fe8',shirt:'#d9e7ff',hair:'#26252b',mood:'happy',line:'Хороший день, правда?'},
@@ -16,7 +21,8 @@ document.querySelectorAll('.moods button').forEach(b=>b.onclick=()=>{if(!selecte
 document.getElementById('soundBtn').onclick=()=>{muted=!muted;document.getElementById('soundBtn').textContent=muted?'○':'◒';toast(muted?'Звук выключен':'Звук включён')};
 window.addEventListener('keydown',e=>{keys[e.key.toLowerCase()]=true;if(e.code==='Space'&&selected){selected.line='Привет! Рада тебя видеть.';selected.mood='happy';say(selected);}});window.addEventListener('keyup',e=>keys[e.key.toLowerCase()]=false);
 function collides(x,y,r=18){if(x<95+r||x>990-r||y<105+r||y>570-r)return true;return obstacles.some(o=>x+r>o.x&&x-r<o.x+o.w&&y+r>o.y&&y-r<o.y+o.h)}
-function movePlayer(){let p=people[0],dx=(keys.d?1:0)-(keys.a?1:0),dy=(keys.s?1:0)-(keys.w?1:0);if(dx||dy){let len=Math.hypot(dx,dy),speed=2.5;dx=dx/len*speed;dy=dy/len*speed;if(!collides(p.x+dx,p.y))p.x+=dx;if(!collides(p.x,p.y+dy))p.y+=dy;lastActivity=Date.now()}}
+function hitsCharacter(x,y,ignore){return people.some(other=>other!==ignore&&Math.hypot(other.x-x,other.y-y)<38)}
+function movePlayer(){let p=people[0],dx=(keys.d?1:0)-(keys.a?1:0),dy=(keys.s?1:0)-(keys.w?1:0);if(dx||dy){let len=Math.hypot(dx,dy),speed=2.5;dx=dx/len*speed;dy=dy/len*speed;if(!collides(p.x+dx,p.y)&&!hitsCharacter(p.x+dx,p.y,p))p.x+=dx;if(!collides(p.x,p.y+dy)&&!hitsCharacter(p.x,p.y+dy,p))p.y+=dy;lastActivity=Date.now()}}
 function say(p){p.bubble=performance.now()+3400;log(p.line,p.name);}
 function idle(){if(Date.now()-lastActivity>7000){let p=people[Math.floor((Date.now()/9000)%people.length)];if(!p.bubble)say(p);lastActivity=Date.now()}}
 canvas.addEventListener('click',e=>{let r=canvas.getBoundingClientRect(),x=(e.clientX-r.left)*W/r.width,y=(e.clientY-r.top)*H/r.height;let p=people.find(a=>Math.hypot(a.x-x,a.y-y)<35);if(p){select(p);say(p)}});
@@ -29,8 +35,8 @@ function drawRoom(){let g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#1
  ctx.fillStyle='#10161c';ctx.fillRect(420,128,150,110);ctx.fillStyle='#263744';ctx.fillRect(429,137,132,91);ctx.strokeStyle='#79828a';ctx.strokeRect(420,128,150,110);ctx.strokeStyle='#49535d';ctx.beginPath();ctx.moveTo(495,128);ctx.lineTo(495,238);ctx.moveTo(420,182);ctx.lineTo(570,182);ctx.stroke();
  // rugs
  ctx.fillStyle='#31353a';ctx.beginPath();ctx.ellipse(575,344,198,95,0,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#454a50';ctx.stroke();ctx.fillStyle='#202328';ctx.beginPath();ctx.ellipse(573,342,175,79,0,0,Math.PI*2);ctx.fill();
- // objects
- drawSofa(205,160,170);drawKitchen(765,150);drawTable(480,445);drawPlant(160,440);drawShelf(905,360);
+ // The initial room is intentionally empty. Generated prop assets can be enabled later.
+ if(roomReady){drawSofa(205,160,170);drawKitchen(765,150);drawTable(480,445);drawPlant(160,440);drawShelf(905,360);}
 }
 function drawSofa(x,y,w){rounded(x,y,w,40,6,'#a74b3e','#c96b58');ctx.fillStyle='#7b3932';ctx.fillRect(x+10,y+39,w-20,12);ctx.fillStyle='#d67b66';ctx.fillRect(x+13,y+7,50,25);ctx.fillRect(x+70,y+7,50,25);ctx.fillStyle='#eb8d75';ctx.fillRect(x+128,y+7,31,25)}
 function drawKitchen(x,y){ctx.fillStyle='#d3d0c7';ctx.fillRect(x,y,160,43);ctx.fillStyle='#555b60';ctx.fillRect(x+8,y+8,50,27);ctx.fillStyle='#15181c';ctx.fillRect(x+82,y+8,59,27);ctx.fillStyle='#b8bfbd';ctx.fillRect(x+12,y+12,42,4);ctx.fillRect(x+92,y+18,36,3)}
