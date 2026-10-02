@@ -27,7 +27,7 @@ function movePlayer(){let p=people[0],dx=(keys.d?1:0)-(keys.a?1:0),dy=(keys.s?1:
 function say(p){p.bubble=performance.now()+3400;log(p.line,p.name);}
 function idle(){if(Date.now()-lastActivity>7000){let p=people[Math.floor((Date.now()/9000)%people.length)];if(!p.bubble)say(p);lastActivity=Date.now()}}
 canvas.addEventListener('click',e=>{let r=canvas.getBoundingClientRect(),x=(e.clientX-r.left)*W/r.width,y=(e.clientY-r.top)*H/r.height;let p=people.find(a=>Math.hypot(a.x-x,a.y-y)<35);if(p){select(p);say(p)}});
-function rounded(x,y,w,h,r,fill,stroke){ctx.beginPath();ctx.roundRect(x,y,w,h,r);ctx.fillStyle=fill;ctx.fill();if(stroke){ctx.strokeStyle=stroke;ctx.stroke()}}
+function rounded(x,y,w,h,r,fill,stroke){ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();ctx.fillStyle=fill;ctx.fill();if(stroke){ctx.strokeStyle=stroke;ctx.stroke()}}
 function drawRoom(){let g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#181b20');g.addColorStop(1,'#0d0f12');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);ctx.fillStyle='#25282d';ctx.beginPath();ctx.moveTo(70,105);ctx.lineTo(1010,105);ctx.lineTo(1038,570);ctx.lineTo(72,570);ctx.closePath();ctx.fill();ctx.strokeStyle='#3d4249';ctx.stroke();
  for(let x=90;x<1020;x+=55){ctx.strokeStyle='#30343a';ctx.beginPath();ctx.moveTo(x,105);ctx.lineTo(x+7,570);ctx.stroke()}for(let y=145;y<570;y+=48){ctx.strokeStyle='#30343a';ctx.beginPath();ctx.moveTo(70,y);ctx.lineTo(1038,y);ctx.stroke()}
  // back wall panels
@@ -48,7 +48,7 @@ function drawCharacter(p){let bob=Math.sin(performance.now()/420+p.x)*1.5;let x=
  // legs and shoes
  ctx.fillStyle='#24252a';ctx.fillRect(x-14,y+10,11,24);ctx.fillRect(x+3,y+10,11,24);ctx.fillStyle='#14161a';ctx.fillRect(x-17,y+30,16,6);ctx.fillRect(x+2,y+30,16,6);
  // torso
- ctx.fillStyle=p.shirt;ctx.beginPath();ctx.roundRect(x-21,y-28,42,42,12);ctx.fill();ctx.fillStyle=p.color;ctx.fillRect(x-21,y-9,42,24);ctx.strokeStyle='#111';ctx.globalAlpha=.18;ctx.stroke();ctx.globalAlpha=1;
+ ctx.fillStyle=p.shirt;rounded(x-21,y-28,42,42,12,p.shirt);ctx.fillStyle=p.color;ctx.fillRect(x-21,y-9,42,24);ctx.strokeStyle='#111';ctx.globalAlpha=.18;ctx.stroke();ctx.globalAlpha=1;
  // arms
  ctx.strokeStyle='#e2a47f';ctx.lineWidth=8;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(x-19,y-14);ctx.lineTo(x-27,y+8);ctx.moveTo(x+19,y-14);ctx.lineTo(x+27,y+8);ctx.stroke();
  // neck/head hair
