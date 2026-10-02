@@ -1,10 +1,11 @@
 const canvas=document.getElementById('game'),ctx=canvas.getContext('2d');
 const W=1100,H=680; let keys={},selected=null,lastActivity=Date.now(),muted=false,roomReady=false;
 const menu=document.getElementById('menu'),gameScreen=document.getElementById('gameScreen');
-document.getElementById('startBtn').onclick=()=>{menu.classList.add('hidden');gameScreen.classList.remove('hidden');toast('Пустой лофт готов — засели его сам');};
-document.getElementById('menuBtn').onclick=()=>{gameScreen.classList.add('hidden');menu.classList.remove('hidden');};
-document.getElementById('clearBtn').onclick=()=>{roomReady=false;toast('Комната очищена: предметы убраны');log('комната очищена','SYSTEM');};
-document.getElementById('howBtn').onclick=()=>toast('WASD — движение · CLICK — выбрать · SPACE — поговорить');
+function menuNotice(text){const n=document.getElementById('menuNotice');if(!n)return;n.textContent=text;n.classList.add('show');}
+document.getElementById('startBtn').addEventListener('click',()=>{menu.classList.add('hidden');gameScreen.classList.remove('hidden');roomReady=false;setTimeout(()=>toast('Пустой лофт готов — засели его сам'),50);});
+document.getElementById('menuBtn').addEventListener('click',()=>{gameScreen.classList.add('hidden');menu.classList.remove('hidden');});
+document.getElementById('clearBtn').addEventListener('click',()=>{roomReady=false;toast('Комната очищена: предметы убраны');log('комната очищена','SYSTEM');});
+document.getElementById('howBtn').addEventListener('click',()=>menuNotice('WASD — движение   /   CLICK — выбрать персонажа   /   SPACE — поговорить. Персонажи не проходят сквозь стены и друг друга.'));
 const people=[
  {id:'template',name:'TEMPLATE',role:'base character',initial:'T',ava:'ava-a',x:345,y:330,color:'#f08b65',shirt:'#e9e1d5',hair:'#442d28',mood:'bored',line:'Ого, тут тихо…'},
  {id:'max',name:'МАКС',role:'resident / 24',initial:'М',ava:'ava-b',x:600,y:350,color:'#5c8fe8',shirt:'#d9e7ff',hair:'#26252b',mood:'happy',line:'Хороший день, правда?'},
